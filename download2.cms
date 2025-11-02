@@ -1,0 +1,107 @@
+﻿// подзадача для сбора ссылок
+// waitms correction
+$S_CORR = 0
+$while = 0
+$pages = 0
+
+// предупреждение, файл для ссылок будет перезаписан
+// нужно ли собирать ссылки
+$mr = DIALOGBOX ("Файл links.txt будет перезаписан. Сохраните данные", 1 ) 
+if ($mr = 1)
+else
+  print("Отменили операцию")
+  HALT
+end_if 
+
+GETSCREEN
+
+LOGWRITE ("начинаем сбор ссылок дела")
+IF_PICTURE_IN (17,923,1186,1025, "all_screens.bmp")
+	LOGWRITE ("координаты кнопки Обновить ",$_return1," ", $_return2)
+	LCLICK($_return1+6, $_return2+10)
+    waitms(2334 + $S_CORR)
+ELSE
+	LOGWRITE ("не нашел кнопку На последнюю страницу")
+	LOGWRITE ("Сохраните изображение кнопки в папку с проектом")
+	goto (end)
+END_IF
+
+KEYDOWN (#CTRL)
+WAITMS (50)
+KEYUP (#CTRL)
+
+KEYDOWN (#CTRL)
+WAITMS (50)
+KEYPRESS (#C)
+KEYUP (#CTRL)
+
+TFCLEAR ("pages.txt") 
+TFCLEAR ("links.txt") 
+
+StrWriteln("pages.txt", FROMCLIP ())
+
+LOGWRITE ("начинаем сбор ссылок дела")
+IF_PICTURE_IN (17,923,1186,1025, "first.bmp")
+	LOGWRITE ("координаты кнопки Обновить ",$_return1," ", $_return2)
+	LCLICK($_return1+6, $_return2+10)
+    waitms(2334 + $S_CORR)
+ELSE
+	LOGWRITE ("не нашел кнопку На первую страницу")
+	LOGWRITE ("Сохраните изображение кнопки в папку с проектом")
+	goto (end)
+END_IF
+
+
+// подготавливаем данные для формирования ссылки
+$pages = STRREADLN ("pages.txt", 5)
+LOGWRITE ("всего ",$pages," ссылок")
+
+LOGWRITE ("начинаем сбор ссылок дела")
+IF_PICTURE_IN (133,54,208,130, "update_button.bmp")
+	LOGWRITE ("координаты кнопки Обновить ",$_return1," ", $_return2)
+	LCLICK($_return1+6, $_return2+10)
+    waitms(2334 + $S_CORR)
+ELSE
+	LOGWRITE ("не нашел кнопку Обновить")
+	LOGWRITE ("Сохраните изображение кнопки в папку с проектом")
+	goto (end)
+END_IF
+
+WHILE ($while < $pages-1)
+	$while = $while + 1
+	LOGWRITE ("заходим в цикл")
+	getscreen
+	// если кнопка дальше есть на экране, нажимаем на нее
+	IF_PICTURE_IN (17,923,1186,1025, "arrow.bmp")
+		LOGWRITE ("координаты кнопки Дальше ",$_return1," ", $_return2)
+		LCLICK($_return1+6, $_return2+10)
+		waitms(334 + $S_CORR) 
+	ELSE
+		LOGWRITE ("не нашел кпонку Дальше")
+		LOGWRITE ("сохраните кнопку заново")
+	END_IF
+
+END_CYC
+
+// переходим к сохранению ссылок в файл
+waitms(44 + $S_CORR) 
+RCLICK(1400,834)
+MOVE (1480, 735)
+waitms(244 + $S_CORR)
+LCLICK(1736,800)
+StrWriteln("links.txt", FROMCLIP ())
+
+// закрываем окно разработчика SHIFT+CTRL+i
+waitms(204 + $S_CORR)
+  keyDown(#CTRL)					
+waitms(266 + $S_CORR)
+  keyDown(#SHIFT)					
+waitms(266 + $S_CORR)
+  KEYPRESS (73)
+waitms(266 + $S_CORR)
+  keyUp(#CTRL)
+waitms(266 + $S_CORR)
+  keyUp(#SHIFT)
+
+end:
+HALT

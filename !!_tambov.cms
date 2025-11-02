@@ -1,0 +1,76 @@
+﻿// RECORDED SCRIPT 23.10.2025 @adjuster2004
+// Тамбовский архив / Владимирский архив
+// Подготавливаем страницу к просмотру. Смотрите требования.
+// Запускаем clickermann и выбираем файл конфигурации
+// Запускаем старт
+// Сначала скрипт собирает ссылки, а затем скачиваем по ним листы
+// Сбор ссылок можно пропустить, если уже имеется наполненный файл links.txt
+
+$string = 0
+
+$dl = DIALOGBOX ("Если нужно собрать ссылки, нажмите YES", 1 ) 
+if ($dl = 1)
+	// запускаем сбор ссылок в файл links.txt
+	#include "download2.cms"
+else
+	LOGWRITE("Пропустили сбор ссылок")
+end_if	
+
+// количество строк в файле для цикла
+$s = TFCOUNT ("links.txt")
+LOGWRITE ("сколько строк получили ",TFCOUNT ("links.txt"))
+
+///////////////////
+// точка старта ///
+///////////////////
+
+// Запускаем цикл загрузки листов по ссылкам из файла links.txt
+WHILE ($string < $s)
+	$long_time = 0
+	$string = $string + 1
+	$link_file = STRREADLN ("links.txt", $string)
+	// помещаем полученную ссылку в буфер
+	TOCLIP ($link_file) 
+
+	//переходим в адресную строку	  
+	LCLICK(770,84)
+		
+	//выделяем содержимое адресной строки и вставляем ссылку из буфера
+	LOGWRITE ("Вставляем обработанную ссылку в адресную строку")
+	waitms(204 + $S_CORR)
+	  keyDown(162)					
+	waitms(266 + $S_CORR)
+	  KEYPRESS (65)
+	waitms(266 + $S_CORR)
+	  KEYPRESS (86)
+	waitms(0 + $S_CORR)
+	  keyUp(162)
+	waitms(270 + $S_CORR)
+	  KEYPRESS (13)
+	  
+	button:
+	// проверяем, есть ли кнопка Сохранить
+	LOGWRITE ("проверяем, есть ли кнопка Сохранить")
+	GETSCREEN
+	IF_PICTURE_IN (1300,40, 1600,142, "button.bmp")
+		waitms(500 + $S_CORR)
+		$long_time = $long_time + 1
+			
+		IF($long_time = 40)
+			LOGWRITE ("Кнопка Сохранить так и не появилась")
+			HALT
+		END_IF
+		// скачиваем картинку  
+		waitms(81 + $S_CORR)
+		  LCLICK(1400,85)
+		waitms(181 + $S_CORR)
+		 
+	ELSE
+		goto (button)
+	END_IF
+LOGWRITE ("Сколько циклов ждали кнопку Сохранить= " , $long_time)
+LOGWRITE ("Осталось загрузить " , $s-$string)
+END_CYC
+
+LOGWRITE ("!!!Завершили загрузку!!!")
+HALT

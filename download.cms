@@ -1,0 +1,63 @@
+﻿// подзадача для сбора ссылок
+// waitms correction
+$S_CORR = 0
+$while = 0
+
+GETSCREEN
+LOGWRITE ("начинаем сбор ссылок дела")
+IF_PICTURE_IN (133,54,208,130, "update_button.bmp")
+	LOGWRITE ("координаты кнопки Обновить ",$_return1," ", $_return2)
+	LCLICK($_return1+6, $_return2+10)
+    waitms(2334 + $S_CORR)
+ELSE
+	LOGWRITE ("не нашел кнопку Обновить")
+	LOGWRITE ("Сохраните изображение кнопки в папку с проектом")
+	goto (end)
+END_IF
+
+WHILE ($while = 0)
+	LOGWRITE ("заходим в цикл")
+	getscreen
+	// если кнопка дальше есть на экране, нажимаем на нее
+	IF_PICTURE_IN (443,958, 552, 1026, "arrow.bmp")
+		LOGWRITE ("координаты кнопки Дальше ",$_return1," ", $_return2)
+		LCLICK($_return1+6, $_return2+10)
+		waitms(334 + $S_CORR) 
+	ELSE
+		LOGWRITE ("не нашел кпонку Дальше")
+		LOGWRITE ("сохраните кнопку заново")
+	END_IF
+	
+	// если появилась ошибка, останавливаем сбор ссылок
+	IF_PICTURE_IN (1135,783, 1654, 1026, "error.bmp")
+		$while = 1
+		LOGWRITE ("появилась ошибка")
+		LOGWRITE ("прекращаем сбор ссылок")
+	ELSE
+		LOGWRITE ("не нашел ошибку")
+		LOGWRITE ("продолжаем сбор ссылок")
+	END_IF	
+END_CYC
+
+// переходим к сохранению ссылок в файл
+waitms(44 + $S_CORR) 
+RCLICK(1400,834)
+MOVE (1480, 735)
+waitms(244 + $S_CORR)
+LCLICK(1736,800)
+StrWriteln("links.txt", FROMCLIP ())
+
+// закрываем окно разработчика SHIFT+CTRL+i
+waitms(204 + $S_CORR)
+  keyDown(#CTRL)					
+waitms(266 + $S_CORR)
+  keyDown(#SHIFT)					
+waitms(266 + $S_CORR)
+  KEYPRESS (73)
+waitms(266 + $S_CORR)
+  keyUp(#CTRL)
+waitms(266 + $S_CORR)
+  keyUp(#SHIFT)
+
+end:
+HALT
